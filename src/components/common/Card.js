@@ -28,4 +28,4 @@ Card.propTypes = {
   children: PropTypes.node
 }
 
-export default Card
+export {Card}

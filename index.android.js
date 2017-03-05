@@ -8,7 +8,8 @@ import React, {Component} from 'react'
 import {AppRegistry, View} from 'react-native'
 import firebase from 'firebase'
 
-import Header from './src/components/common/Header'
+import {Header} from './src/components/common'
+import LoginForm from './src/components/LoginForm'
 
 class rnauth extends Component {
   componentWillMount () {
@@ -25,6 +26,7 @@ class rnauth extends Component {
     return (
       <View style={{flex: 1}}>
         <Header title='Auth' />
+        <LoginForm />
       </View>
     )
   }
