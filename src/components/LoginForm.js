@@ -2,19 +2,23 @@ import React, {Component} from 'react'
 import {Text} from 'react-native'
 import firebase from 'firebase'
 
-import {Button, Card, CardSection, Input} from './common'
+import {Button, Card, CardSection, Input, Spinner} from './common'
 
 class LoginForm extends Component {
   constructor (props) {
     super(props)
 
+    this.onLoginSuccess = this.onLoginSuccess.bind(this)
+    this.onRegisterSuccess = this.onRegisterSuccess.bind(this)
+    this.onLoginError = this.onLoginError.bind(this)
+    this.onSubmitHandler = this.onSubmitHandler.bind(this)
+
     this.state = {
       email: '',
       password: '',
-      error: ''
+      error: '',
+      loading: false
     }
-
-    this.onSubmitHandler = this.onSubmitHandler.bind(this)
   }
 
   // logic
@@ -29,21 +33,48 @@ class LoginForm extends Component {
   onSubmitHandler () {
     const {email, password} = this.state
 
-    this.setState({error: ''})
+    this.setState({error: '', loading: true})
 
     firebase.auth()
     .signInWithEmailAndPassword(email, password)
-    .then(response => {
-
-    }).catch(() => {
+    .then(this.onLoginSuccess)
+    .catch(() => {
       firebase.auth()
       .createUserWithEmailAndPassword(email, password)
-      .then(response => {
-
-      }).catch(() => {
-        this.setState({error: 'Authentication Failed'})
-      })
+      .then(this.onRegisterSuccess)
+      .catch(this.onLoginError)
     })
+  }
+
+  onLoginSuccess (response) {
+    console.log(response)
+    this.setState({
+      email: '',
+      password: '',
+      loading: false
+    })
+  }
+
+  onRegisterSuccess () {
+    this.setState({loading: false})
+  }
+
+  onLoginError () {
+    this.setState({error: 'Authentication Failed', loading: false})
+  }
+
+  // render
+  renderButton () {
+    if (this.state.loading) {
+      return <Spinner />
+    }
+
+    return (
+      <Button
+        text='Log In'
+        onPress={() => this.onSubmitHandler()}
+      />
+    )
   }
 
   render () {
@@ -69,15 +100,16 @@ class LoginForm extends Component {
           />
         </CardSection>
 
-        <Text style={styles.errorStyle}>
-          {this.state.error}
-        </Text>
+        {
+          !this.state.loading &&
+          <Text style={styles.errorStyle}>
+            {this.state.error}
+          </Text>
+        }
 
         <CardSection>
-          <Button
-            text='Log In'
-            onPress={() => this.onSubmitHandler()}
-          />
+
+          {this.renderButton()}
         </CardSection>
       </Card>
     )
@@ -86,7 +118,9 @@ class LoginForm extends Component {
 
 const styles = {
   errorStyle: {
-    fontSize: 18,
+    paddingTop: 5,
+    paddingBottom: 5,
+    fontSize: 20,
     alignSelf: 'center',
     color: 'red'
   }
